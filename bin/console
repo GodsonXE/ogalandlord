@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use App\Console\Commands\RunRentRemindersCommand;
+use App\Domain\Caretaker\Services\CaretakerRoutingService;
+use App\Domain\Reminders\Services\RentReminderService;
+use App\Infrastructure\Database\Connection;
+use App\Infrastructure\Notifications\EmailNotificationChannel;
+use App\Infrastructure\Notifications\SmsNotificationChannel;
+
+$db = new Connection();
+$mailer = new EmailNotificationChannel();
+$sms = new SmsNotificationChannel();
+$router = new CaretakerRoutingService($db);
+
+$service = new RentReminderService($db, $mailer, $sms, $router);
+$cmd = new RunRentRemindersCommand($service);
+
+$code = $cmd->handle($argv);
+exit($code);
